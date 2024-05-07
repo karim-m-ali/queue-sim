@@ -18,7 +18,8 @@ class QueueSim:
 
     def simulate(self, queues : list[ql.Queue], 
                  queue_scheduler : ql.QueueScheduler):
-        new_window = results_gui.ResultsWindow(queue_scheduler.schedule(queues))
+        new_window = results_gui.ResultsTopLevel(self.main_window,
+                                                 queue_scheduler.schedule(queues))
         new_window.mainloop()
 
 

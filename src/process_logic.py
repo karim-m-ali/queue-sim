@@ -33,6 +33,7 @@ class FCFSScheduler(ProcessScheduler):
     @staticmethod
     @override
     def schedule(processes : list[Process]) -> list[Schedule]:
+        processes = sorted(processes, key=lambda process: process.arrival)
         schedules : list[Schedule] = []
         current_time = 0
         for process in processes:
@@ -45,34 +46,45 @@ class FCFSScheduler(ProcessScheduler):
         return schedules
 
 
-class RRScheduler(ProcessScheduler):
-    @staticmethod
-    @override
-    def schedule(processes : list[Process]):
-        answer : list[Schedule] = []
-        return answer
-
-
 class LPFNonPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
-    def schedule(processes : list[Process]):
-        answer : list[Schedule] = []
-        return answer
+    def schedule(processes : list[Process]) -> list[Schedule]:
+        processes = sorted(processes, key=lambda process: process.priority)
+        schedules : list[Schedule] = []
+        current_time = 0
+        for process in processes:
+            schedules.append(Schedule(
+                process.name, 
+                start=current_time, 
+                duration=process.burst
+                ))
+            current_time += process.burst
+        return schedules
+
+
+class SRTFNonPreemptiveScheduler(ProcessScheduler):
+    @staticmethod
+    @override
+    def schedule(processes : list[Process]) -> list[Schedule]:
+        processes = sorted(processes, key=lambda process: process.burst)
+        schedules : list[Schedule] = []
+        current_time = 0
+        for process in processes:
+            schedules.append(Schedule(
+                process.name, 
+                start=current_time, 
+                duration=process.burst
+                ))
+            current_time += process.burst
+        return schedules
 
 
 class LPFPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
     def schedule(processes : list[Process]):
-        answer : list[Schedule] = []
-        return answer
-
-
-class SRTFNonPreemptiveScheduler(ProcessScheduler):
-    @staticmethod
-    @override
-    def schedule(processes : list[Process]):
+        # TODO:
         answer : list[Schedule] = []
         return answer
 
@@ -81,17 +93,28 @@ class SRTFPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
     def schedule(processes : list[Process]):
+        # TODO:
         answer : list[Schedule] = []
         return answer
 
 
+class RRScheduler(ProcessScheduler):
+    @staticmethod
+    @override
+    def schedule(processes : list[Process]):
+        # TODO:
+        answer : list[Schedule] = []
+        return answer
+
+
+# TODO: Undo comment implemented classes.
 PROCESS_SCHEDULERS_DICT = {
         'FCFS': FCFSScheduler(),
-        'RR': RRScheduler(),
         'LPF-NP': LPFNonPreemptiveScheduler(),
-        'LPF-P': LPFPreemptiveScheduler(),
+        # 'LPF-P': LPFPreemptiveScheduler(),
         'SRTF-NP': SRTFNonPreemptiveScheduler(),
-        'SRTF-P': SRTFPreemptiveScheduler(),
+        # 'SRTF-P': SRTFPreemptiveScheduler(),
+        # 'RR': RRScheduler(),
         }
 
 def get_process_scheduler_key(process_scheduler : ProcessScheduler):

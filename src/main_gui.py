@@ -374,7 +374,7 @@ class HeaderFrame(tk.Frame):
         self.main_window = container
 
         # Queue Options
-        self.queue_option_label = tk.Label(self, text='Queue:')
+        self.queue_option_label = tk.Label(self, text='Queues:')
         self.queue_option_label.pack(side=tk.LEFT, **LABEL_PAD_ARGS)
         self.add_queue_button = tk.Button(self, text='Add', 
                                          **BLUE_BG_ARGS,
@@ -390,7 +390,7 @@ class HeaderFrame(tk.Frame):
                                                       expand=True)
 
         # Process Options
-        self.process_option_label = tk.Label(self, text='Process:')
+        self.process_option_label = tk.Label(self, text='Processes:')
         self.process_option_label.pack(side=tk.LEFT, **LABEL_PAD_ARGS)
         self.add_process_button = tk.Button(self, text='Add', 
                                        **BLUE_BG_ARGS,
