@@ -6,6 +6,7 @@
 
 from dataclasses import dataclass
 from typing_extensions import override
+from copy import deepcopy
 
 @dataclass
 class Schedule:
@@ -33,6 +34,7 @@ class FCFSScheduler(ProcessScheduler):
     @staticmethod
     @override
     def schedule(processes : list[Process]) -> list[Schedule]:
+        processes = deepcopy(processes)
         processes = sorted(processes, key=lambda process: process.arrival)
         schedules : list[Schedule] = []
         current_time = 0
@@ -50,6 +52,7 @@ class LPFNonPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
     def schedule(processes : list[Process]) -> list[Schedule]:
+        processes = deepcopy(processes)
         processes = sorted(processes, key=lambda process: process.priority)
         schedules : list[Schedule] = []
         current_time = 0
@@ -67,6 +70,7 @@ class SRTFNonPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
     def schedule(processes : list[Process]) -> list[Schedule]:
+        processes = deepcopy(processes)
         processes = sorted(processes, key=lambda process: process.burst)
         schedules : list[Schedule] = []
         current_time = 0
