@@ -82,7 +82,7 @@ class LPFNonPreemptiveScheduler(ProcessScheduler):
                     process.arrival <= current_time]            
             if possible_processes:
                 best_process = min(possible_processes, 
-                                   key=lambda process: process.burst)
+                                   key=lambda process: process.priority)
                 best_process.burst -= 1
             else:
                 best_process = EMPTY_PROCESS
@@ -103,10 +103,35 @@ class SRTFNonPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
     def schedule(processes : list[Process]) -> list[Schedule]:
-        # TODO:
         processes = deepcopy(processes)
         schedules : list[Schedule] = []
+        current_time = -1
+        while True:
+            processes = [process for process in processes if process.burst > 0]
+            if not processes:
+                break
+            current_time += 1
+            possible_processes = [process for process in processes if \
+                    process.arrival <= current_time]            
+            if possible_processes:
+                best_process = min(possible_processes, 
+                                   key=lambda process: process.burst)
+                best_process.burst -= 1
+            else:
+                best_process = EMPTY_PROCESS
+            if schedules and schedules[-1].process_name == best_process.name:
+                schedules[-1].duration += 1
+            else:
+                schedules.append(
+                        Schedule(
+                            process_name=best_process.name,
+                            start=current_time,
+                            duration=1,
+                            )
+                        )
         return schedules
+
+
 
 
 class LPFPreemptiveScheduler(ProcessScheduler):
