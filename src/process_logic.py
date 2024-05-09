@@ -70,17 +70,9 @@ class SRTFNonPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
     def schedule(processes : list[Process]) -> list[Schedule]:
+        # TODO:
         processes = deepcopy(processes)
-        processes = sorted(processes, key=lambda process: process.burst)
         schedules : list[Schedule] = []
-        current_time = 0
-        for process in processes:
-            schedules.append(Schedule(
-                process.name, 
-                start=current_time, 
-                duration=process.burst
-                ))
-            current_time += process.burst
         return schedules
 
 
@@ -89,8 +81,9 @@ class LPFPreemptiveScheduler(ProcessScheduler):
     @override
     def schedule(processes : list[Process]):
         # TODO:
-        answer : list[Schedule] = []
-        return answer
+        processes = deepcopy(processes)
+        schedules : list[Schedule] = []
+        return schedules
 
 
 class SRTFPreemptiveScheduler(ProcessScheduler):
@@ -98,8 +91,9 @@ class SRTFPreemptiveScheduler(ProcessScheduler):
     @override
     def schedule(processes : list[Process]):
         # TODO:
-        answer : list[Schedule] = []
-        return answer
+        processes = deepcopy(processes)
+        schedules : list[Schedule] = []
+        return schedules
 
 
 class RRScheduler(ProcessScheduler):
@@ -107,8 +101,9 @@ class RRScheduler(ProcessScheduler):
     @override
     def schedule(processes : list[Process]):
         # TODO:
-        answer : list[Schedule] = []
-        return answer
+        processes = deepcopy(processes)
+        schedules : list[Schedule] = []
+        return schedules
 
 
 # TODO: Undo comment implemented classes.
