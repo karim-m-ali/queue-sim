@@ -17,6 +17,7 @@ BLUE_BG_ARGS = dict(bg='#a9a3d3', activebackground='#cbc5f5')
 PAD_ARGS = dict(padx=8, pady=8)
 LABEL_PAD_ARGS = dict(padx=(8, 0), pady=8)
 PROCESS_FG = '#fff'
+PROCESS_BG_BLANK = 'lightgray'
 PROCESS_BG_DICT = {
         'P1':  'darkmagenta',
         'P2':  'darkcyan',
@@ -30,7 +31,6 @@ PROCESS_BG_DICT = {
         'P10': 'steelblue',
         'P11': 'tomato',
         'P12': 'green',
-
 }
 
 class MainWindow(tk.Tk):
@@ -226,7 +226,8 @@ class ProcessFrame(tk.LabelFrame):
 
         # Process Name
         self.name_entry = tk.Entry(self, textvariable=self.name_var,
-                                   readonlybackground=PROCESS_BG_DICT[self.process_object.name],
+                                   readonlybackground=PROCESS_BG_DICT[self.process_object.name] \
+                                           if self.process_object.name in PROCESS_BG_DICT else PROCESS_BG_BLANK,
                                    fg=PROCESS_FG, 
                                    state='readonly', width=3)
         self.name_entry.pack(side=tk.LEFT, **PAD_ARGS)

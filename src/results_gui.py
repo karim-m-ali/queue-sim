@@ -9,7 +9,7 @@ import tkinter.font as font
 import queue_logic as ql
 import process_logic as pl
 from main_gui import RED_BG_ARGS, GREEN_BG_ARGS, BLUE_BG_ARGS, PAD_ARGS, \
-        LABEL_PAD_ARGS, PROCESS_FG, PROCESS_BG_DICT
+        LABEL_PAD_ARGS, PROCESS_FG, PROCESS_BG_DICT, PROCESS_BG_BLANK
 
 class ResultsTopLevel(tk.Toplevel):
     def __init__(self, main_window, schedule_timelines : list[ql.ScheduleTimeline]):
@@ -66,7 +66,8 @@ class ScheduleFrame(tk.Frame):
 
         self.name_entry = tk.Entry(self, width=3,
                                    fg='#fff',
-                    readonlybackground=PROCESS_BG_DICT[schedule.process_name])
+                    readonlybackground=PROCESS_BG_DICT[schedule.process_name] \
+                            if schedule.process_name in PROCESS_BG_DICT else PROCESS_BG_BLANK)
         self.name_entry.insert(0, schedule.process_name)
         self.name_entry.configure(state='readonly')
         self.name_entry.pack(side=tk.TOP, fill=tk.X)
