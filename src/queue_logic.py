@@ -79,6 +79,7 @@ class PriorityQueueScheduler(QueueScheduler):
     @override
     @staticmethod
     def schedule(queues : list[Queue]) -> list[ScheduleTimeline]:
+        queues = copy.deepcopy(queues)
         schedule_timelines = QueueScheduler.get_schedule_timelines(queues)
 
         cpu_timeline = ScheduleTimeline(name='CPU', schedule_list=[],            
@@ -100,9 +101,7 @@ class PriorityQueueScheduler(QueueScheduler):
             all_processes += queue.processes
         QueueScheduler.set_status(all_processes, cpu_timeline)
 
-        print('medo')
-        return [cpu_timeline] + schedule_timelines
-
+        return [cpu_timeline] 
 
 # TODO: Undo comment implemented classes.
 QUEUE_SCHEDULERS_DICT = {

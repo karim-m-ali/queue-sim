@@ -22,7 +22,7 @@ class Process:
     burst : int
     priority : int
 
-EMPTY_PROCESS = Process('', 0, 0, 0)
+EMPTY_PROCESS = Process('', 0, 1, 0)
 
 
 class ProcessScheduler:
@@ -38,19 +38,19 @@ class FCFSScheduler(ProcessScheduler):
     def schedule(processes : list[Process]) -> list[Schedule]:
         processes = deepcopy(processes)
         schedules : list[Schedule] = []
-        current_time = -1
+        current_time = 0
         while True:
             processes = [process for process in processes if process.burst > 0]
             if not processes:
                 break
-            current_time += 1
             possible_processes = [process for process in processes if \
                     process.arrival <= current_time]            
             if possible_processes:
                 best_process = min(possible_processes, 
                                    key=lambda process: process.arrival)
-                best_process.burst -= 1
+                current_time += best_process.burst
             else:
+                current_time += 1
                 best_process = EMPTY_PROCESS
             if schedules and schedules[-1].process_name == best_process.name:
                 schedules[-1].duration += 1
@@ -59,17 +59,88 @@ class FCFSScheduler(ProcessScheduler):
                         Schedule(
                             process_name=best_process.name,
                             start=current_time,
-                            duration=1,
+                            duration=best_process.burst,
                             )
                         )
+                best_process.burst = 0
         return schedules
-
 
 
 class LPFNonPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
     def schedule(processes : list[Process]) -> list[Schedule]:
+        processes = deepcopy(processes)
+        schedules : list[Schedule] = []
+        current_time = 0
+        while True:
+            processes = [process for process in processes if process.burst > 0]
+            if not processes:
+                break
+            possible_processes = [process for process in processes if \
+                    process.arrival <= current_time]            
+            if possible_processes:
+                best_process = min(possible_processes, 
+                                   key=lambda process: process.priority)
+                current_time += best_process.burst
+            else:
+                current_time += 1
+                best_process = EMPTY_PROCESS
+            if schedules and schedules[-1].process_name == best_process.name:
+                schedules[-1].duration += 1
+            else:
+                schedules.append(
+                        Schedule(
+                            process_name=best_process.name,
+                            start=current_time,
+                            duration=best_process.burst,
+                            )
+                        )
+                best_process.burst = 0
+        return schedules
+  
+
+class SRTFNonPreemptiveScheduler(ProcessScheduler):
+    @staticmethod
+    @override
+    def schedule(processes : list[Process]) -> list[Schedule]:
+        processes = deepcopy(processes)
+        schedules : list[Schedule] = []
+        current_time = 0
+        while True:
+            processes = [process for process in processes if process.burst > 0]
+            if not processes:
+                break
+            possible_processes = [process for process in processes if \
+                    process.arrival <= current_time]            
+            if possible_processes:
+                best_process = min(possible_processes, 
+                                   key=lambda process: process.burst)
+                current_time += best_process.burst
+            else:
+                current_time += 1
+                best_process = EMPTY_PROCESS
+            if schedules and schedules[-1].process_name == best_process.name:
+                schedules[-1].duration += 1
+            else:
+                schedules.append(
+                        Schedule(
+                            process_name=best_process.name,
+                            start=current_time,
+                            duration=best_process.burst,
+                            )
+                        )
+                best_process.burst = 0
+        return schedules
+
+      
+
+
+
+class LPFPreemptiveScheduler(ProcessScheduler):
+    @staticmethod
+    @override
+    def schedule(processes : list[Process]):
         processes = deepcopy(processes)
         schedules : list[Schedule] = []
         current_time = -1
@@ -99,10 +170,10 @@ class LPFNonPreemptiveScheduler(ProcessScheduler):
         return schedules
 
 
-class SRTFNonPreemptiveScheduler(ProcessScheduler):
+class SRTFPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
-    def schedule(processes : list[Process]) -> list[Schedule]:
+    def schedule(processes : list[Process]):
         processes = deepcopy(processes)
         schedules : list[Schedule] = []
         current_time = -1
@@ -132,28 +203,6 @@ class SRTFNonPreemptiveScheduler(ProcessScheduler):
         return schedules
 
 
-
-
-class LPFPreemptiveScheduler(ProcessScheduler):
-    @staticmethod
-    @override
-    def schedule(processes : list[Process]):
-        # TODO:
-        processes = deepcopy(processes)
-        schedules : list[Schedule] = []
-        return schedules
-
-
-class SRTFPreemptiveScheduler(ProcessScheduler):
-    @staticmethod
-    @override
-    def schedule(processes : list[Process]):
-        # TODO:
-        processes = deepcopy(processes)
-        schedules : list[Schedule] = []
-        return schedules
-
-
 class RRScheduler(ProcessScheduler):
     @staticmethod
     @override
@@ -168,9 +217,9 @@ class RRScheduler(ProcessScheduler):
 PROCESS_SCHEDULERS_DICT = {
         'FCFS': FCFSScheduler(),
         'LPF-NP': LPFNonPreemptiveScheduler(),
-        # 'LPF-P': LPFPreemptiveScheduler(),
-        # 'SRTF-NP': SRTFNonPreemptiveScheduler(),
-        # 'SRTF-P': SRTFPreemptiveScheduler(),
+        'LPF-P': LPFPreemptiveScheduler(),
+        'SRTF-NP': SRTFNonPreemptiveScheduler(),
+        'SRTF-P': SRTFPreemptiveScheduler(),
         # 'RR': RRScheduler(),
         }
 
