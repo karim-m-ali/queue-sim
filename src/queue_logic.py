@@ -59,7 +59,7 @@ class QueueScheduler:
             if len(queue.processes):
                 schedule_timeline = ScheduleTimeline(
                         queue.name, 
-                        queue.process_scheduler.schedule(queue.processes),
+                        queue.process_scheduler.schedule(copy.deepcopy(queue.processes), queue.quantum),
                         0, 0, 0)
                 QueueScheduler.set_status(queue.processes, schedule_timeline)
                 schedule_timelines.append(schedule_timeline)

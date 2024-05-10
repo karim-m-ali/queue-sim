@@ -6,7 +6,6 @@
 
 from dataclasses import dataclass
 from typing_extensions import override
-from copy import deepcopy
 
 @dataclass
 class Schedule:
@@ -27,7 +26,7 @@ EMPTY_PROCESS = Process('', 0, 1, 0)
 
 class ProcessScheduler:
     @staticmethod
-    def schedule(processes : list[Process]) -> list[Schedule]:
+    def schedule(processes : list[Process], quantum: int) -> list[Schedule]:
         answer : list[Schedule] = []
         return answer
 
@@ -35,8 +34,7 @@ class ProcessScheduler:
 class FCFSScheduler(ProcessScheduler):
     @staticmethod
     @override
-    def schedule(processes : list[Process]) -> list[Schedule]:
-        processes = deepcopy(processes)
+    def schedule(processes : list[Process], quantum: int) -> list[Schedule]:
         schedules : list[Schedule] = []
         current_time = 0
         while True:
@@ -69,8 +67,7 @@ class FCFSScheduler(ProcessScheduler):
 class LPFNonPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
-    def schedule(processes : list[Process]) -> list[Schedule]:
-        processes = deepcopy(processes)
+    def schedule(processes : list[Process], quantum: int) -> list[Schedule]:
         schedules : list[Schedule] = []
         current_time = 0
         while True:
@@ -103,8 +100,7 @@ class LPFNonPreemptiveScheduler(ProcessScheduler):
 class SRTFNonPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
-    def schedule(processes : list[Process]) -> list[Schedule]:
-        processes = deepcopy(processes)
+    def schedule(processes : list[Process], quantum: int) -> list[Schedule]:
         schedules : list[Schedule] = []
         current_time = 0
         while True:
@@ -140,8 +136,7 @@ class SRTFNonPreemptiveScheduler(ProcessScheduler):
 class LPFPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
-    def schedule(processes : list[Process]):
-        processes = deepcopy(processes)
+    def schedule(processes : list[Process], quantum: int):
         schedules : list[Schedule] = []
         current_time = -1
         while True:
@@ -173,8 +168,7 @@ class LPFPreemptiveScheduler(ProcessScheduler):
 class SRTFPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
-    def schedule(processes : list[Process]):
-        processes = deepcopy(processes)
+    def schedule(processes : list[Process], quantum: int):
         schedules : list[Schedule] = []
         current_time = -1
         while True:
@@ -206,9 +200,8 @@ class SRTFPreemptiveScheduler(ProcessScheduler):
 class RRScheduler(ProcessScheduler):
     @staticmethod
     @override
-    def schedule(processes : list[Process]):
+    def schedule(processes : list[Process], quantum: int):
         # TODO:
-        processes = deepcopy(processes)
         schedules : list[Schedule] = []
         return schedules
 
