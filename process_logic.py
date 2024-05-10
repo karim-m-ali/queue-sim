@@ -14,6 +14,7 @@ class Schedule:
     duration : int
 
 
+
 @dataclass
 class Process:
     name : str
