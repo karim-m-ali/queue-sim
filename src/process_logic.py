@@ -30,6 +30,32 @@ class ProcessScheduler:
         answer : list[Schedule] = []
         return answer
 
+class Queue:
+    def __init__(self):
+        self.items = []
+
+    def enqueue(self, item):
+        self.items.append(item)
+
+    def dequeue(self):
+        if not self.is_empty():
+            return self.items.pop(0)
+        else:
+            raise IndexError("Queue is empty")
+
+    def is_empty(self):
+        return len(self.items) == 0
+
+    def size(self):
+        return len(self.items)
+
+    def peek(self):
+        """Return the item at the front of the queue without removing it."""
+        if not self.is_empty():
+            return self.items[0]
+        else:
+            raise IndexError("Queue is empty")
+
 
 class FCFSScheduler(ProcessScheduler):
     @staticmethod
@@ -45,7 +71,7 @@ class FCFSScheduler(ProcessScheduler):
                     process.arrival <= current_time]            
             if possible_processes:
                 best_process = min(possible_processes, 
-                                   key=lambda process: process.arrival)
+                                key=lambda process: process.arrival)
                 current_time += best_process.burst
             else:
                 current_time += 1
@@ -78,7 +104,7 @@ class LPFNonPreemptiveScheduler(ProcessScheduler):
                     process.arrival <= current_time]            
             if possible_processes:
                 best_process = min(possible_processes, 
-                                   key=lambda process: process.priority)
+                                key=lambda process: process.priority)
                 current_time += best_process.burst
             else:
                 current_time += 1
@@ -95,7 +121,7 @@ class LPFNonPreemptiveScheduler(ProcessScheduler):
                         )
                 best_process.burst = 0
         return schedules
-  
+
 
 class SRTFNonPreemptiveScheduler(ProcessScheduler):
     @staticmethod
@@ -111,7 +137,7 @@ class SRTFNonPreemptiveScheduler(ProcessScheduler):
                     process.arrival <= current_time]            
             if possible_processes:
                 best_process = min(possible_processes, 
-                                   key=lambda process: process.burst)
+                                key=lambda process: process.burst)
                 current_time += best_process.burst
             else:
                 current_time += 1
@@ -129,7 +155,7 @@ class SRTFNonPreemptiveScheduler(ProcessScheduler):
                 best_process.burst = 0
         return schedules
 
-      
+
 
 
 
@@ -148,7 +174,7 @@ class LPFPreemptiveScheduler(ProcessScheduler):
                     process.arrival <= current_time]            
             if possible_processes:
                 best_process = min(possible_processes, 
-                                   key=lambda process: process.priority)
+                                key=lambda process: process.priority)
                 best_process.burst -= 1
             else:
                 best_process = EMPTY_PROCESS
@@ -180,7 +206,7 @@ class SRTFPreemptiveScheduler(ProcessScheduler):
                     process.arrival <= current_time]            
             if possible_processes:
                 best_process = min(possible_processes, 
-                                   key=lambda process: process.burst)
+                                key=lambda process: process.burst)
                 best_process.burst -= 1
             else:
                 best_process = EMPTY_PROCESS
@@ -197,12 +223,52 @@ class SRTFPreemptiveScheduler(ProcessScheduler):
         return schedules
 
 
+
 class RRScheduler(ProcessScheduler):
     @staticmethod
     @override
-    def schedule(processes : list[Process], quantum: int):
-        # TODO:
-        schedules : list[Schedule] = []
+    def schedule(processes: list[Process], time_slice: int) -> list[Schedule]:
+        schedules: list[Schedule] = []
+        current_time = 0
+        schedule_duration = 0
+        process_queue = Queue()
+        # Sort the list to make the first elements is the elements nearest to our current time which start from zero
+        processes = sorted(processes, key=lambda process: process.arrival)
+        
+        while processes or not process_queue.is_empty():
+            while processes and processes[0].arrival <= current_time:
+                process_queue.enqueue(processes.pop(0))
+            
+            if not process_queue.is_empty():
+                current_process = process_queue.dequeue()
+                schedule_duration = min(time_slice, current_process.burst)
+                current_time += schedule_duration
+                schedules.append(Schedule(
+                    process_name=current_process.name,
+                    start=current_time,
+                    duration=schedule_duration
+                ))
+                current_process.burst -= schedule_duration
+                while processes and processes[0].arrival <= current_time:
+                    process_queue.enqueue(processes.pop(0))
+                # Add back to the queue if burst time is remaining
+                if current_process.burst > 0:
+                    process_queue.enqueue(current_process)
+            else:
+                current_time += 1
+                best_process = EMPTY_PROCESS
+                if schedules and schedules[-1].process_name == best_process.name:
+                    schedules[-1].duration += 1
+                else:
+                    schedules.append(
+                            Schedule(
+                                process_name=best_process.name,
+                                start=current_time,
+                                duration=1,
+                                )
+                            )
+                
+                
         return schedules
 
 
@@ -213,7 +279,7 @@ PROCESS_SCHEDULERS_DICT = {
         'LPF-P': LPFPreemptiveScheduler(),
         'SRTF-NP': SRTFNonPreemptiveScheduler(),
         'SRTF-P': SRTFPreemptiveScheduler(),
-        # 'RR': RRScheduler(),
+        'RR': RRScheduler(),
         }
 
 def get_process_scheduler_key(process_scheduler : ProcessScheduler):
