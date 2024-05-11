@@ -37,14 +37,13 @@ class HeaderFrame(tk.Frame):
     def __init__(self, container, schedule_timeline : ql.ScheduleTimeline):
         super().__init__(container)
 
-        self.name_entry = tk.Entry(self, width=3)
+        self.name_entry = tk.Entry(self, width=len(schedule_timeline.name) + 1)
         self.name_entry.insert(0, schedule_timeline.name)
         self.name_entry.configure(state='readonly')
         self.name_entry.pack(side=tk.LEFT, **PAD_ARGS)
 
         if schedule_timeline.name == 'CPU':
             self.name_entry.configure(
-                    width=4, 
                     readonlybackground='#222',
                     fg='#fff',
                     )
