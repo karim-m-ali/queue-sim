@@ -1,11 +1,13 @@
 """
 @file main_window.py
+@author Sherif Adel
 @author Karim M. Ali <https://github.com/kmuali>
-@date May 06, 2024
+@date May 06, 2024 - May 11, 2024
 """
 
 from dataclasses import dataclass
 from typing_extensions import override
+from copy import deepcopy
 
 @dataclass
 class Schedule:
@@ -20,8 +22,6 @@ class Process:
     arrival : int
     burst : int
     priority : int
-
-EMPTY_PROCESS = Process('', 0, 1, 0)
 
 
 class ProcessScheduler:
@@ -61,32 +61,31 @@ class FCFSScheduler(ProcessScheduler):
     @staticmethod
     @override
     def schedule(processes : list[Process], quantum: int) -> list[Schedule]:
+        processes = deepcopy(processes)
         schedules : list[Schedule] = []
         current_time = 0
         while True:
-            processes = [process for process in processes if process.burst > 0]
-            if not processes:
-                break
             possible_processes = [process for process in processes if \
+                    process.burst > 0]
+
+            if not possible_processes:
+                break
+            ready_processes = [process for process in possible_processes if \
                     process.arrival <= current_time]            
-            if possible_processes:
-                best_process = min(possible_processes, 
-                                key=lambda process: process.arrival)
-                current_time += best_process.burst
-            else:
+            if not ready_processes:
                 current_time += 1
-                best_process = EMPTY_PROCESS
-            if schedules and schedules[-1].process_name == best_process.name:
-                schedules[-1].duration += 1
-            else:
-                schedules.append(
-                        Schedule(
-                            process_name=best_process.name,
-                            start=current_time,
-                            duration=best_process.burst,
-                            )
+                continue
+            best_process = min(ready_processes, 
+                               key=lambda process: process.arrival)
+            schedules.append(
+                    Schedule(
+                        process_name=best_process.name,
+                        start=current_time,
+                        duration=best_process.burst,
                         )
-                best_process.burst = 0
+                    )
+            current_time += best_process.burst
+            best_process.burst = 0
         return schedules
 
 
@@ -94,32 +93,31 @@ class LPFNonPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
     def schedule(processes : list[Process], quantum: int) -> list[Schedule]:
+        processes = deepcopy(processes)
         schedules : list[Schedule] = []
         current_time = 0
         while True:
-            processes = [process for process in processes if process.burst > 0]
-            if not processes:
-                break
             possible_processes = [process for process in processes if \
+                    process.burst > 0]
+
+            if not possible_processes:
+                break
+            ready_processes = [process for process in possible_processes if \
                     process.arrival <= current_time]            
-            if possible_processes:
-                best_process = min(possible_processes, 
-                                key=lambda process: process.priority)
-                current_time += best_process.burst
-            else:
+            if not ready_processes:
                 current_time += 1
-                best_process = EMPTY_PROCESS
-            if schedules and schedules[-1].process_name == best_process.name:
-                schedules[-1].duration += 1
-            else:
-                schedules.append(
-                        Schedule(
-                            process_name=best_process.name,
-                            start=current_time,
-                            duration=best_process.burst,
-                            )
+                continue
+            best_process = min(ready_processes, 
+                               key=lambda process: process.priority)
+            schedules.append(
+                    Schedule(
+                        process_name=best_process.name,
+                        start=current_time,
+                        duration=best_process.burst,
                         )
-                best_process.burst = 0
+                    )
+            current_time += best_process.burst
+            best_process.burst = 0
         return schedules
 
 
@@ -127,57 +125,54 @@ class SRTFNonPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
     def schedule(processes : list[Process], quantum: int) -> list[Schedule]:
+        processes = deepcopy(processes)
         schedules : list[Schedule] = []
         current_time = 0
         while True:
-            processes = [process for process in processes if process.burst > 0]
-            if not processes:
-                break
             possible_processes = [process for process in processes if \
+                    process.burst > 0]
+
+            if not possible_processes:
+                break
+            ready_processes = [process for process in possible_processes if \
                     process.arrival <= current_time]            
-            if possible_processes:
-                best_process = min(possible_processes, 
-                                key=lambda process: process.burst)
-                current_time += best_process.burst
-            else:
+            if not ready_processes:
                 current_time += 1
-                best_process = EMPTY_PROCESS
-            if schedules and schedules[-1].process_name == best_process.name:
-                schedules[-1].duration += 1
-            else:
-                schedules.append(
-                        Schedule(
-                            process_name=best_process.name,
-                            start=current_time,
-                            duration=best_process.burst,
-                            )
+                continue
+            best_process = min(ready_processes, 
+                               key=lambda process: process.burst)
+            schedules.append(
+                    Schedule(
+                        process_name=best_process.name,
+                        start=current_time,
+                        duration=best_process.burst,
                         )
-                best_process.burst = 0
+                    )
+            current_time += best_process.burst
+            best_process.burst = 0
         return schedules
-
-
-
 
 
 class LPFPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
     def schedule(processes : list[Process], quantum: int):
+        processes = deepcopy(processes)
         schedules : list[Schedule] = []
         current_time = -1
         while True:
-            processes = [process for process in processes if process.burst > 0]
-            if not processes:
+            possible_processes = [process for process in processes if \
+                    process.burst > 0]
+            if not possible_processes:
                 break
             current_time += 1
-            possible_processes = [process for process in processes if \
+            ready_processes = [process for process in possible_processes if \
                     process.arrival <= current_time]            
-            if possible_processes:
-                best_process = min(possible_processes, 
-                                key=lambda process: process.priority)
-                best_process.burst -= 1
-            else:
-                best_process = EMPTY_PROCESS
+            if not ready_processes:
+                continue
+            best_process = min(ready_processes, 
+                            key=lambda process: process.priority)
+            best_process.burst -= 1
             if schedules and schedules[-1].process_name == best_process.name:
                 schedules[-1].duration += 1
             else:
@@ -195,21 +190,22 @@ class SRTFPreemptiveScheduler(ProcessScheduler):
     @staticmethod
     @override
     def schedule(processes : list[Process], quantum: int):
+        processes = deepcopy(processes)
         schedules : list[Schedule] = []
         current_time = -1
         while True:
-            processes = [process for process in processes if process.burst > 0]
-            if not processes:
+            possible_processes = [process for process in processes if \
+                    process.burst > 0]
+            if not possible_processes:
                 break
             current_time += 1
-            possible_processes = [process for process in processes if \
+            ready_processes = [process for process in possible_processes if \
                     process.arrival <= current_time]            
-            if possible_processes:
-                best_process = min(possible_processes, 
-                                key=lambda process: process.burst)
-                best_process.burst -= 1
-            else:
-                best_process = EMPTY_PROCESS
+            if not ready_processes:
+                continue
+            best_process = min(ready_processes, 
+                            key=lambda process: process.burst)
+            best_process.burst -= 1
             if schedules and schedules[-1].process_name == best_process.name:
                 schedules[-1].duration += 1
             else:
@@ -223,16 +219,17 @@ class SRTFPreemptiveScheduler(ProcessScheduler):
         return schedules
 
 
-
 class RRScheduler(ProcessScheduler):
     @staticmethod
     @override
-    def schedule(processes: list[Process], time_slice: int) -> list[Schedule]:
+    def schedule(processes: list[Process], quantum: int) -> list[Schedule]:
+        processes = deepcopy(processes)
         schedules: list[Schedule] = []
         current_time = 0
         schedule_duration = 0
         process_queue = Queue()
-        # Sort the list to make the first elements is the elements nearest to our current time which start from zero
+        # Sort the list to make the first elements is the elements nearest 
+        # to our current time which start from zero
         processes = sorted(processes, key=lambda process: process.arrival)
         
         while processes or not process_queue.is_empty():
@@ -241,13 +238,19 @@ class RRScheduler(ProcessScheduler):
             
             if not process_queue.is_empty():
                 current_process = process_queue.dequeue()
-                schedule_duration = min(time_slice, current_process.burst)
+                schedule_duration = min(quantum, current_process.burst)
+                if schedules and \
+                        schedules[-1].process_name == current_process.name:
+                    schedules[-1].duration += schedule_duration
+                else:
+                    schedules.append(
+                            Schedule(
+                                process_name=current_process.name,
+                                start=current_time,
+                                duration=schedule_duration,
+                                )
+                            )
                 current_time += schedule_duration
-                schedules.append(Schedule(
-                    process_name=current_process.name,
-                    start=current_time,
-                    duration=schedule_duration
-                ))
                 current_process.burst -= schedule_duration
                 while processes and processes[0].arrival <= current_time:
                     process_queue.enqueue(processes.pop(0))
@@ -256,23 +259,9 @@ class RRScheduler(ProcessScheduler):
                     process_queue.enqueue(current_process)
             else:
                 current_time += 1
-                best_process = EMPTY_PROCESS
-                if schedules and schedules[-1].process_name == best_process.name:
-                    schedules[-1].duration += 1
-                else:
-                    schedules.append(
-                            Schedule(
-                                process_name=best_process.name,
-                                start=current_time,
-                                duration=1,
-                                )
-                            )
-                
-                
         return schedules
 
 
-# TODO: Undo comment implemented classes.
 PROCESS_SCHEDULERS_DICT = {
         'FCFS': FCFSScheduler(),
         'LPF-NP': LPFNonPreemptiveScheduler(),

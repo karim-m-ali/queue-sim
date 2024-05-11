@@ -17,6 +17,29 @@ class ScheduleTimeline:
     context_switches : int
     avg_wait : float
     max_wait : int
+    min_wait : int
+    total_time : int
+    def __init__(self, name : str, schedule_list : list[Schedule], 
+                 processes : list[Process]):
+        self.name = name
+        self.schedule_list = schedule_list
+        self.context_switches = len(self.schedule_list) - 1
+        self.avg_wait = 0.0
+        self.max_wait = 0
+        self.min_wait = 1_000_000_000
+        self.total_time = 0
+        for process in processes:
+            expected_end_time = process.arrival + process.burst
+            actual_end_time = 0
+            for schedule in reversed(self.schedule_list):
+                if schedule.process_name == process.name:
+                    actual_end_time = schedule.start + schedule.duration
+                    break
+            wait = actual_end_time - expected_end_time
+            self.max_wait = max(self.max_wait, wait)
+            self.min_wait = min(self.min_wait, wait)
+            self.avg_wait += wait / len(processes)
+            self.total_time = max(self.total_time, actual_end_time)
 
 
 @dataclass
@@ -35,73 +58,28 @@ class QueueScheduler:
         schedule_timelines = []
         return schedule_timelines
 
-    @staticmethod
-    def set_status(processes : list[Process], timeline : ScheduleTimeline):
-        timeline.context_switches = len(timeline.schedule_list) - 1
-        timeline.max_wait = 0
-        timeline.avg_wait = 0.0
-        for process in processes:
-            expected_end_time = process.arrival + process.burst
-            actual_end_time = 0
-            for schedule in reversed(timeline.schedule_list):
-                if schedule.process_name == process.name:
-                    actual_end_time = schedule.start + schedule.duration
-                    break
-            wait = actual_end_time - expected_end_time
-            timeline.max_wait = max(timeline.max_wait, wait)
-            timeline.avg_wait += wait 
-        timeline.avg_wait /= len(processes)
-
-    @staticmethod
-    def get_schedule_timelines(queues : list[Queue]) -> list[ScheduleTimeline]:
-        schedule_timelines = []
-        for queue in queues:
-            if len(queue.processes):
-                schedule_timeline = ScheduleTimeline(
-                        queue.name, 
-                        queue.process_scheduler.schedule(copy.deepcopy(queue.processes), queue.quantum),
-                        0, 0, 0)
-                QueueScheduler.set_status(queue.processes, schedule_timeline)
-                schedule_timelines.append(schedule_timeline)
-        return schedule_timelines
-
 
 class SliceQueueScheduler(QueueScheduler):
     @staticmethod
     @override
     def schedule(queues : list[Queue]) -> list[ScheduleTimeline]:
         # TODO: Implement.
-        schedule_timelines = QueueScheduler.get_schedule_timelines(queues)
-        return schedule_timelines
+        return []
 
 
 class PriorityQueueScheduler(QueueScheduler):
     @override
     @staticmethod
     def schedule(queues : list[Queue]) -> list[ScheduleTimeline]:
-        queues = copy.deepcopy(queues)
-        schedule_timelines = QueueScheduler.get_schedule_timelines(queues)
-
-        cpu_timeline = ScheduleTimeline(name='CPU', schedule_list=[],            
-                                        context_switches=0, avg_wait=0, 
-                                        max_wait=0)
-        current_time = 0
-        for timeline in schedule_timelines:
-            for schedule in timeline.schedule_list:
-                cpu_timeline.schedule_list.append(
-                        Schedule(
-                            process_name=schedule.process_name,
-                            start=current_time, 
-                            duration=schedule.duration)
-                        )
-                current_time += schedule.duration
-
-        all_processes = []
-        for queue in queues:
-            all_processes += queue.processes
-        QueueScheduler.set_status(all_processes, cpu_timeline)
-
-        return [cpu_timeline] 
+        # TODO: Implement.
+        return [ScheduleTimeline(
+            name=queue.name, 
+            processes=queue.processes, 
+            schedule_list=queue.process_scheduler.schedule(
+                queue.processes,
+                queue.quantum
+                )
+            ) for queue in queues]
 
 # TODO: Undo comment implemented classes.
 QUEUE_SCHEDULERS_DICT = {

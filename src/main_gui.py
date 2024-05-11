@@ -190,7 +190,7 @@ class QueueFrame(tk.LabelFrame):
             self.priority_var.set(self.queue_object.priority)
 
         try:
-            if 0 <= self.quantum_var.get() <= 999:
+            if 1 <= self.quantum_var.get() <= 999:
                 self.queue_object.quantum = self.quantum_var.get()
             else:
                 self.quantum_var.set(self.queue_object.quantum)
@@ -198,7 +198,7 @@ class QueueFrame(tk.LabelFrame):
             self.quantum_var.set(self.queue_object.quantum)
 
         try:
-            if 0 <= self.slice_time_var.get() <= 999:
+            if 1 <= self.slice_time_var.get() <= 999:
                 self.queue_object.slice_time = self.slice_time_var.get()
             else:
                 self.slice_time_var.set(self.queue_object.slice_time)
@@ -292,7 +292,7 @@ class ProcessFrame(tk.LabelFrame):
             self.arrival_var.set(self.process_object.arrival)
 
         try:
-            if 0 <= self.burst_var.get() <= 999:
+            if 1 <= self.burst_var.get() <= 999:
                 self.process_object.burst = self.burst_var.get()
             else:
                 self.burst_var.set(self.process_object.burst)
