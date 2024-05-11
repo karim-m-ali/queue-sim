@@ -103,8 +103,58 @@ class SliceQueueScheduler(QueueScheduler):
     @staticmethod
     @override
     def schedule(queues : list[Queue]) -> list[ScheduleTimeline]:
-        # TODO: Implement.
-        return []
+        schedules_dict = QueueScheduler.schedule_pre(queues)
+
+        tmp_schedules_dict = copy.deepcopy(schedules_dict)
+        cpu_processes = QueueScheduler.all_processes(queues)
+        cpu_schedules : list[Schedule] = []
+
+        current_time = 0
+        while True:
+            possible_queues_dict = {queue: schedules for queue, schedules in 
+                                    tmp_schedules_dict.items() if schedules}
+            if not possible_queues_dict:
+                break
+            ready_queues_dict = {queue: schedules for queue, schedules in 
+                                 possible_queues_dict.items() if 
+                                 schedules[0].start <= current_time}
+            if not ready_queues_dict:
+                current_time += 1
+                continue
+            next_queues_dict = {queue: schedules for queue, schedules 
+                                          in ready_queues_dict.items() if 
+                                          queue.slice_time > 0}
+            if not next_queues_dict: # reset slice time
+                next_queues_dict = ready_queues_dict
+                for queue in queues:
+                    for tmp_queue in next_queues_dict.keys():
+                        if queue.name == tmp_queue.name:
+                            tmp_queue.slice_time = queue.slice_time
+                            break
+            best_queue = min(
+                    next_queues_dict, 
+                    key=lambda queue: queue.slice_time
+                    )
+            best_queue.slice_time -= 1
+            best_schedule = ready_queues_dict[best_queue][0]
+            if cpu_schedules and cpu_schedules[-1].process_name == \
+                    best_schedule.process_name:
+                cpu_schedules[-1].duration += 1
+            else:
+                cpu_schedules.append(Schedule(
+                    process_name=best_schedule.process_name,
+                    start=current_time,
+                    duration=1,
+                    ))
+            best_schedule.duration -= 1
+            if best_schedule.duration == 0:
+                ready_queues_dict[best_queue].remove(best_schedule)
+            current_time += 1
+
+        return QueueScheduler.schedules_post(cpu_schedules=cpu_schedules, 
+                                             cpu_processes=cpu_processes,
+                                             queues=queues, 
+                                             schedules_dict=schedules_dict)
 
 
 class PriorityQueueScheduler(QueueScheduler):
@@ -151,8 +201,7 @@ class PriorityQueueScheduler(QueueScheduler):
                                              queues=queues, 
                                              schedules_dict=schedules_dict)
 
-# TODO: Undo comment implemented classes.
 QUEUE_SCHEDULERS_DICT = {
-        # 'Time Slice': SliceQueueScheduler(), 
+        'Time Slice': SliceQueueScheduler(), 
         'Priority': PriorityQueueScheduler()
         }

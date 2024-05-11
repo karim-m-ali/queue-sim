@@ -112,7 +112,7 @@ class SchedulesFrame(tk.Frame):
         # Creating frames
         for index, schedule in enumerate(tmp_schedules):
             frame = ScheduleFrame(self, schedule)
-            weight = schedule.duration * 1000 // total_time
+            weight = schedule.duration * 1_000_000 // total_time
             self.columnconfigure(index=index, weight=weight)
             frame.grid(row=0, column=index, sticky=tk.EW)
 
