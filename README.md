@@ -57,7 +57,7 @@ We welcome contributions! To contribute, please follow these steps:
 
 ## License
 
-QueueSim is licensed under the GNU Affero General Public License v3.0. 
+QueueSim is licensed under the GNU General Public License v3.0. 
 See the ![LICENSE](LICENSE) file for more information.
 
 ## Acknowledgements
